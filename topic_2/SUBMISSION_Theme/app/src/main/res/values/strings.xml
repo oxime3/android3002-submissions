@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">BeatBox</string>
+
+    <string name="def_theme">Default theme</string>
+
+    <string-array name="theme_options">
+        <item>Default theme</item>
+        <item>Light theme</item>
+        <item>Dark theme</item>
+    </string-array>
+
+    <string-array name="theme_options_values">
+        <item>Default theme</item>
+        <item>Light theme</item>
+        <item>Dark theme</item>
+    </string-array>
+
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>

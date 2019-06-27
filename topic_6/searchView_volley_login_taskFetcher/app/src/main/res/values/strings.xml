@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Task Getter</string>
+    <string name="TASK_COMPLETE">Complete</string>
+    <string name="TASK_INCOMPLETE">Incomplete</string>
+    <string name="login">Login</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="btn_login">LOGIN</string>
+    <string name="register">Register here.</string>
+    <string name="error.CONNECTION">There was an error connecting to the server. Please ensure that server is running, and the app config is using the server\'s IP address.</string>
+</resources>

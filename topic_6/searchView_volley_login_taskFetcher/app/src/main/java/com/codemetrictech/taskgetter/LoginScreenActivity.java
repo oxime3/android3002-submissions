@@ -1,0 +1,222 @@
+package com.codemetrictech.taskgetter;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Request.Method;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import helper.SessionManager;
+import helper.SharedPrefManager;
+import volley.AppController;
+import volley.Config_URL;
+
+import static volley.AppController.TAG;
+
+public class LoginScreenActivity extends AppCompatActivity {
+
+    EditText username;
+    EditText password;
+    TextView registertextlink;
+    Button loginbtn;
+
+
+    private ProgressDialog pDialog;
+    private SessionManager session;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.loginscreen_activity);
+
+        username = (EditText) findViewById(R.id.usernamefield);
+        password = (EditText) findViewById(R.id.passwordfield);
+        registertextlink = (TextView) findViewById(R.id.registertext);
+        loginbtn = (Button) findViewById(R.id.loginbtn);
+
+        // Progress dialog
+        pDialog = new ProgressDialog(this);
+        pDialog.setCancelable(false);
+
+        //SharedPreference
+        if (SharedPrefManager.getInstance(this).isLoggedIn()) {
+            finish();
+            startActivity(new Intent(this, MainActivity.class));
+        }
+
+//         Session manager
+//        session = new SessionManager(getApplicationContext());
+//
+//        // Check if user is already logged in or not
+//        if (session.isLoggedIn()) {
+//            // User is already logged in. Take him to main activity
+//            Intent intent = new Intent(LoginScreenActivity.this, MainActivity.class);
+//            startActivity(intent);
+//            finish();
+//        }
+
+        registertextlink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginScreenActivity.this, RegistrationScreenActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        loginbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String loginUsername = username.getText().toString();
+                String loginPassword = password.getText().toString();
+
+                // Check for empty data in the form
+                if (loginUsername.trim().length() > 0 && loginPassword.trim().length() > 0) {
+                    // login user
+                    checkLogin(loginUsername, loginPassword);
+                } else {
+                    // Prompt user to enter credentials
+                    Toast.makeText(getApplicationContext(),
+                            "Please enter the credentials!", Toast.LENGTH_LONG)
+                            .show();
+                }
+            }
+        });
+    }
+
+    /**
+     * function to verify login details in mysql db
+     * */
+    private void checkLogin(final String username, final String password) {
+        // Tag used to cancel the request
+        String tag_string_req = "req_login";
+
+        pDialog.setMessage("Logging in ...");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.GET,
+                Config_URL.URL_LOGIN, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Login Response: " + response.toString());
+                hideDialog();
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+//                    JSONArray jArr = jObj.getJSONArray("users");
+                    boolean error = jObj.optBoolean("error");
+
+                    // Check for error node in json
+                    if (!error) {
+//                      user successfully logged in
+//                      Create login session
+                        //session.setLogin(true);
+
+                        // Launch main activity
+                        Intent intent = new Intent(LoginScreenActivity.this,
+                                MainActivity.class);
+                        startActivity(intent);
+                        finish();
+
+                    } else {
+                        // Error in login. Get the error message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    // JSON error
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                hideDialog();
+                if(error.getMessage() != null){
+                    Log.e(TAG, error.getMessage());
+                } else {
+                    Log.e(TAG, "Error, check if server is running!");
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(LoginScreenActivity.this);
+
+                builder.setMessage(getResources().getString(R.string.error_CONNECTION));
+                builder.setNegativeButton("Exit Application", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+                builder.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                Snackbar.make(LoginScreenActivity.this.findViewById(R.id.login_screen), "Server error.", Snackbar.LENGTH_INDEFINITE)
+                        .show();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                // Posting parameters to login url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("tag", "login");
+                params.put("username", username);
+                params.put("password", password);
+
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    private void showDialog() {
+        if (!pDialog.isShowing())
+            pDialog.show();
+    }
+
+    private void hideDialog() {
+        if (pDialog.isShowing())
+            pDialog.dismiss();
+    }
+
+}

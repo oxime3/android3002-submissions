@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:id="@+id/relaView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/floatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="2dp"
+            app:fabSize="mini"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@android:drawable/ic_media_play" />
+
+        <TextView
+            android:id="@+id/back_grnd_music_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="Background music"
+            android:textSize="5pt"
+            android:layout_toRightOf="@id/floatingActionButton"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:layout_above="@+id/sound_control"
+            android:layout_below="@id/floatingActionButton"
+            android:layout_centerInParent="true" />
+
+        <SeekBar
+            android:id="@+id/sound_control"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:max="6"
+            android:min="1"
+
+            />
+
+
+
+    </RelativeLayout>
+
+</layout>
